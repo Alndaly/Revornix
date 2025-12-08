@@ -2,6 +2,8 @@ import sys
 import os
 from pathlib import Path
 from dotenv import load_dotenv
+from urllib.parse import quote_plus
+
 load_dotenv(override=True)
 
 sys.path.append(str(Path(__file__).resolve().parent.parent))
@@ -17,8 +19,13 @@ from alembic import context
 # access to the values within the .ini file in use.
 config = context.config
 
+POSTGRES_PASSWORD = os.environ.get('POSTGRES_PASSWORD')
+if not POSTGRES_PASSWORD:
+    raise Exception('POSTGRES_PASSWORD is not set')
+POSTGRES_PASSWORD = quote_plus(POSTGRES_PASSWORD)
+
 # 动态设置 sqlalchemy.url
-db_url = f"postgresql://{os.environ.get('POSTGRES_USER')}:{os.environ.get('POSTGRES_PASSWORD')}@{os.environ.get('POSTGRES_DB_URL')}/{os.environ.get('POSTGRES_DB')}"
+db_url = f"postgresql://{os.environ.get('POSTGRES_USER')}:{POSTGRES_PASSWORD}@{os.environ.get('POSTGRES_DB_URL')}/{os.environ.get('POSTGRES_DB')}"
 config.set_main_option('sqlalchemy.url', db_url)
 
 # Interpret the config file for Python logging.
